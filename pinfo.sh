@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 show_help() {
@@ -71,32 +70,36 @@ while getopts "pPsucoh" opt; do
 done
 shift "$((OPTIND-1))" # Shift off the options and optional --.
 
-if [ $PIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-		printf "%-8s\t" "PID"
-fi
-if [ $PPIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-		printf "%-20s\t" "PPID"
-fi
-if [ $STATUSFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-		printf "%-20s\t" "STATUS"
-fi
-if [ $UIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-		printf "%-20s\t" "UID"
-fi
-if [ $COMMANDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-		printf "%-20s\t" "COMMAND"
-fi
-if [ $POLICYFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-		printf "%-14s\t" "POLICY"
-fi
-echo
-echo
 rmmod pinfo.ko &> /dev/null
 insmod pinfo.ko
 
-dmesg | grep -E "[0-9]+[ ][0-9]+[ ][0-9]+" | cut -d " " -f2-7 > output
-awk '!seen[$0]++' output > coutput
-rm output
+if [ $? -ne 0 ]; then 
+	exit 1
+fi
+
+if [ $PIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
+		printf "%-8s" "PID"
+fi
+if [ $PPIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
+		printf "%-20s" "PPID"
+fi
+if [ $STATUSFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
+		printf "%-20s" "STATUS"
+fi
+if [ $UIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
+		printf "%-20s" "UID"
+fi
+if [ $COMMANDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
+		printf "%-20s" "COMMAND"
+fi
+if [ $POLICYFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
+		printf "%-14s" "POLICY"
+fi
+echo
+echo
+
+dmesg -c | grep -E "pinfo: " | cut -d " " -f3-8 > output.log
+awk '!seen[$0]++' output.log > coutput
 
 while read line; do
 	pid=`echo $line | cut -d " " -f1`
@@ -122,7 +125,17 @@ while read line; do
 		;;
 	64)	real_status="TASK_DEAD"
 		;;
-	*)	real_status="OTHER"
+	128)	real_status="TASK_WAKEKILL"
+		;;
+	256)	real_status="TASK_WAKING"
+		;;
+	512)	real_status="TASK_PARKED"
+		;;
+	1024)	real_status="TASK_NOLOAD"
+		;;
+	2048)	real_status="TASK_STATE_MAX "
+		;;
+	*)	real_status="UNKNOWN"
 		;;
 	esac
 
@@ -150,22 +163,22 @@ while read line; do
 	esac
 
 	if [ $PIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-			printf "%-8d\t" $pid
+			printf "%-8d" $pid
 	fi
 	if [ $PPIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-			printf "%-20s\t" "$ppid ($ppid_comm)"
+			printf "%-20s" "$ppid ($ppid_comm)"
 	fi
 	if [ $STATUSFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-			printf "%-20s\t" $real_status
+			printf "%-20s" $real_status
 	fi
 	if [ $UIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-			printf "%-20s\t" $real_uid
+			printf "%-20s" $real_uid
 	fi
 	if [ $COMMANDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-			printf "%-20s\t" $comm
+			printf "%-20s" $comm
 	fi
 	if [ $POLICYFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
-			printf "%-14s\t" $real_policy
+			printf "%-14s" $real_policy
 	fi
 	echo
 done < coutput

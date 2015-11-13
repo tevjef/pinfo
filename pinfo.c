@@ -4,6 +4,8 @@
 #include <linux/printk.h>
 #include <linux/sched.h>
 
+#define PINFO_LOG KERN_INFO "pinfo: "
+
 MODULE_LICENSE("GPL");
 
 static int __init pinfo_init (void) {
@@ -11,13 +13,13 @@ static int __init pinfo_init (void) {
 	for_each_process(task) {
 		long int uid = task->cred->uid.val;
 		int ppid = task_ppid_nr(task);
-		pr_info("%d %d %d %ld %s %d \n", task->pid, ppid, task->state, uid, task->comm, task->policy);
+		printk(PINFO_LOG "%d %d %d %ld %s %d \n", task->pid, ppid, task->state, uid, task->comm, task->policy);
 	}
 	return 0;
 }
 
 static void __exit pinfo_exit (void) {
-	printk(KERN_INFO "Done! \n");
+	printk(PINFO_LOG "Done! \n");
 }
 
 module_init(pinfo_init);
