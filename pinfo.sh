@@ -28,6 +28,7 @@ OPTIND=1 # Reset is necessary if getopts was used previously in the script.  It 
 PIDFLAG=0
 PPIDFLAG=0
 STATUSFLAG=0
+UIDFLAG=0
 COMMANDFLAG=0
 POLICYFLAG=0
 ALLFLAG=1
@@ -50,6 +51,10 @@ while getopts "pPsucoh" opt; do
 			STATUSFLAG=1
 			ALLFLAG=0
        		;;
+   		u)	
+			UIDFLAG=1
+			ALLFLAG=0
+   			;;
 		c)	
 			COMMANDFLAG=1
 			ALLFLAG=0
@@ -74,6 +79,9 @@ if [ $PPIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
 fi
 if [ $STATUSFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
 		printf "%-20s\t" "STATUS"
+fi
+if [ $UIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
+		printf "%-20s\t" "UID"
 fi
 if [ $COMMANDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
 		printf "%-20s\t" "COMMAND"
@@ -149,6 +157,9 @@ while read line; do
 	fi
 	if [ $STATUSFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
 			printf "%-20s\t" $real_status
+	fi
+	if [ $UIDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
+			printf "%-20s\t" $real_uid
 	fi
 	if [ $COMMANDFLAG -eq 1 ] || [ $ALLFLAG -eq 1 ]; then
 			printf "%-20s\t" $comm
