@@ -5,7 +5,6 @@ show_help() {
     Usage: ${0##*/} [-pPsuco]
     A linux kernel module that extracts information about processes. Optional parameters
     to specify columns
-    
 		-p   	list the pid
 
 		-P   	list the process's parent id (ppid)
@@ -20,8 +19,7 @@ show_help() {
 
 		-h  	help
 		"
- }
-
+}
 
 OPTIND=1 # Reset is necessary if getopts was used previously in the script.  It is a good idea to make this local in a function.
 PIDFLAG=0
@@ -38,27 +36,27 @@ while getopts "pPsucoh" opt; do
 			show_help
 			exit 0
 			;;
-		p)	
+		p)
 			PIDFLAG=1
 			ALLFLAG=0
 			;;
-		P)	
+		P)
 			PPIDFLAG=1
 			ALLFLAG=0
 			;;
-		s)	
+		s)
 			STATUSFLAG=1
 			ALLFLAG=0
-       		;;
-   		u)	
+       			;;
+   		u)
 			UIDFLAG=1
 			ALLFLAG=0
    			;;
-		c)	
+		c)
 			COMMANDFLAG=1
 			ALLFLAG=0
 			;;
-		o)	
+		o)
 			POLICYFLAG=1
 			ALLFLAG=0
 			;;
@@ -73,7 +71,7 @@ shift "$((OPTIND-1))" # Shift off the options and optional --.
 rmmod pinfo.ko &> /dev/null
 insmod pinfo.ko
 
-if [ $? -ne 0 ]; then 
+if [ $? -ne 0 ]; then
 	exit 1
 fi
 
@@ -100,6 +98,7 @@ echo
 
 dmesg -c | grep -E "pinfo: " | cut -d " " -f3-8 > output.log
 awk '!seen[$0]++' output.log > coutput
+rm output.log
 
 while read line; do
 	pid=`echo $line | cut -d " " -f1`
@@ -184,3 +183,4 @@ while read line; do
 done < coutput
 
 rmmod pinfo.ko
+rm coutput
