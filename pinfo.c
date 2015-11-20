@@ -18,9 +18,7 @@ static int __init pinfo_init (void) {
 	return 0;
 }
 
-static void __exit pinfo_exit (void) {
-	printk(PINFO_LOG "Done! \n");
-}
+static void __exit pinfo_exit (void) {}
 
 module_init(pinfo_init);
 module_exit(pinfo_exit);
